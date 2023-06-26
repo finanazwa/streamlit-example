@@ -1,38 +1,56 @@
-from collections import namedtuple
-import altair as alt
-import math
+
 import pandas as pd
 import streamlit as st
 
-"""
-# Welcome to Streamlit!
+from datetime import datetime
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+# Function to get the date from user input
+def get_date():
+    while True:
+        date_str = input("Enter the due date (YYYY-MM-DD): ")
+        try:
+            date = datetime.strptime(date_str, "%Y-%m-%d")
+            return date
+        except ValueError:
+            print("Invalid date format. Please try again.")
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Function to get the priority from user input
+def get_priority():
+    while True:
+        priority = input("Enter the priority (important/not important): ")
+        if priority.lower() in ["important", "not important"]:
+            return priority.lower()
+        else:
+            print("Invalid priority. Please try again.")
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Create a class for tasks
+class Task:
+    def __init__(self, description, due_date, priority):
+        self.description = description
+        self.due_date = due_date
+        self.priority = priority
 
+    def __str__(self):
+        return f"{self.description} (Due: {self.due_date.strftime('%Y-%m-%d')}, Priority: {self.priority.capitalize()})"
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+# Create an empty list to store tasks
+tasks = []
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+# Get the number of tasks from the user
+num_tasks = int(input("Enter the number of tasks: "))
 
-    points_per_turn = total_points / num_turns
+# Prompt the user to input task details
+for i in range(1, num_tasks + 1):
+    print(f"\nTask {i}:")
+    description = input("Enter the task description: ")
+    due_date = get_date()
+    priority = get_priority()
+    tasks.append(Task(description, due_date, priority))
 
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
+# Sort tasks by due date and priority
+sorted_tasks = sorted(tasks, key=lambda x: (x.due_date, x.priority == "important"), reverse=False)
 
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+# Print the sorted tasks
+print("\nSorted Tasks:")
+for task in sorted_tasks:
+    print(task)
